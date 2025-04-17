@@ -89,7 +89,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["VIDEO_ID"] = video_id
     context.user_data["URL"] = text
     script = ""
-    codes_langue=""
+    codes_langue=[]
 
     langues = list_available_transcript_languages(text)
 
