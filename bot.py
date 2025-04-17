@@ -39,6 +39,7 @@ async def send_long_message(text: str, update: Update):
 
 def create_language_keyboard(video: str):
     langs = list_available_transcript_languages(video)
+    print(langs)
     keyboard = []
     for lang_code, lang_name in langs:
         keyboard.append([
@@ -88,10 +89,41 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["VIDEO_ID"] = video_id
     context.user_data["URL"] = text
 
-    await update.message.reply_text(
+    langs = list_available_transcript_languages(text)
+    
+    selected_lang = langs[0][0]
+
+    """await update.message.reply_text(
         "🌐 Choisissez la langue du script de la vidéo :",
         reply_markup=create_language_keyboard(text)
-    )
+    )"""
+
+    if 'LANGUE' not in context.user_data :
+        language_dict = dict(les_langues())
+        language_name = language_dict.get(update.message.from_user.language_code, "Français")
+        context.user_data["LANGUE"] = language_name
+        
+        if not context.user_data["VIDEO_ID"]:
+            await update.message.reply_text("❌ Ce n’est pas un lien YouTube valide.")
+            return
+
+        loading_msg = await update.message.reply_text("📄 Traitement en cours...")
+        try:
+            
+            script = get_youtube_transcript_from_url(context.user_data["URL"], lang_code=selected_lang)["full_text"]
+            if not script:
+                await update.message.reply_text(f"⚠️ Pas de transcription en '{selected_lang}'")
+                return
+        except Exception as e:
+            await update.message.reply_text(f"⚠️ Erreur : {str(e)}")
+            return
+
+        #await loading_msg.delete()
+        #loading_msg = await query.edit_message_text("💡 Résumé en cours...")
+        summary = summarize_youtube_script_with_mistral(script, context.user_data["LANGUE"])["markdown_summary"]
+        # await update.message.reply_text(summary[:4096]) # Telegram limite à 4096 caractères par message
+        await loading_msg.delete()
+        await send_long_message(summary, update)
 
     
 
