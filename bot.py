@@ -1,5 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes,  MessageHandler, filters
+from youtube_transcript_api import YouTubeTranscriptApi
 from dotenv import load_dotenv
 import os
 import logging
@@ -90,10 +91,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["URL"] = text
     script = ""
     codes_langue=[]
+    langues = []
 
-    langues = list_available_transcript_languages(text)
+    transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
+    for t in transcripts:
+        langues.append((t.language_code, t.language))  # Tuple: (code, nom)
 
-    if langues:
+    if len(langues) > 0:
         codes_langue = [code for code, nom in langues]
 
     selected_langue = codes_langue[0]
