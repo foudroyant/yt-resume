@@ -30,7 +30,7 @@ def get_youtube_transcript_from_url(url: str, lang_code : str, with_timestamps=F
             # Essaye avec la langue spécifiée
             transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=[lang_code])
         except NoTranscriptFound:
-            print(f"⚠️ Pas de transcription en '{lang_code}', tentative dans la langue d'origine...")
+            #print(f"⚠️ Pas de transcription en '{lang_code}', tentative dans la langue d'origine...")
             # Si la langue n'existe pas, récupère la première dispo
             transcript = YouTubeTranscriptApi.list_transcripts(video_id).find_manually_created_transcript(['en', 'auto'])
             transcript = transcript.fetch()

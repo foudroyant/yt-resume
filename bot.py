@@ -88,12 +88,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     video_id = extract_youtube_id(text)
     context.user_data["VIDEO_ID"] = video_id
     context.user_data["URL"] = text
+    script = ""
 
-    langs = list_available_transcript_languages(text)
-    print(langs)
-    
-    selected_lang = langs[0][0]
-    print(selected_lang)
+    langues = list_available_transcript_languages(text)
+
+    if langues:
+        codes_langue = [code for code, nom in langues]
+
+    selected_langue = codes_langue[0]
+    print(selected_langue)
 
     """await update.message.reply_text(
         "🌐 Choisissez la langue du script de la vidéo :",
@@ -112,9 +115,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         loading_msg = await update.message.reply_text("📄 Traitement en cours...")
         try:
             
-            script = get_youtube_transcript_from_url(context.user_data["URL"], lang_code=selected_lang)["full_text"]
+            script = get_youtube_transcript_from_url(context.user_data["URL"], lang_code=selected_langue)["full_text"]
             if not script:
-                await update.message.reply_text(f"⚠️ Pas de transcription en '{selected_lang}'")
+                await update.message.reply_text(f"⚠️ Pas de transcription en '{selected_langue}'")
                 return
         except Exception as e:
             await update.message.reply_text(f"⚠️ Erreur : {str(e)}")

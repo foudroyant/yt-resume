@@ -4,21 +4,22 @@ from id_video import extract_youtube_id
 
 def list_available_transcript_languages(youtube_url: str):
     video_id = extract_youtube_id(youtube_url)
+    
     if not video_id:
-        #print("❌ Impossible d'extraire l'ID de la vidéo.")
-        return
+        return None
 
     try:
         transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
-        liste = []
-        #print(f"\n🌍 Langues disponibles pour la vidéo {video_id} :\n")
+        langues = []
+
         for t in transcripts:
-            auto = " (auto-généré)" if t.is_generated else ""
-            #print(f"🔹 {t.language_code} ➜ {t.language}{auto}")
-            liste.append([t.language_code, t.language])
-        return liste
+            langues.append((t.language_code, t.language))  # Tuple: (code, nom)
+
+        return langues
+
     except Exception as e:
         print(f"❌ Erreur lors de la récupération des langues : {e}")
+        return None
 
-ls = list_available_transcript_languages("https://youtu.be/X--4L2y997k?si=rniUcNnWZnvI3teU")
-print(ls)
+print(list_available_transcript_languages("https://youtu.be/UIH0nvDgxw0?si=MQVlYdr8b_744heO"))
+#list_available_transcript_languages("https://youtu.be/UIH0nvDgxw0?si=MQVlYdr8b_744heO")
