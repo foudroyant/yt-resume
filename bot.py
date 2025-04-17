@@ -90,8 +90,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["URL"] = text
 
     langs = list_available_transcript_languages(text)
+    print(langs)
     
     selected_lang = langs[0][0]
+    print(selected_lang)
 
     """await update.message.reply_text(
         "🌐 Choisissez la langue du script de la vidéo :",
@@ -118,12 +120,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"⚠️ Erreur : {str(e)}")
             return
 
-        #await loading_msg.delete()
-        #loading_msg = await query.edit_message_text("💡 Résumé en cours...")
-        summary = summarize_youtube_script_with_mistral(script, context.user_data["LANGUE"])["markdown_summary"]
-        # await update.message.reply_text(summary[:4096]) # Telegram limite à 4096 caractères par message
-        await loading_msg.delete()
-        await send_long_message(summary, update)
+    #await loading_msg.delete()
+    #loading_msg = await query.edit_message_text("💡 Résumé en cours...")
+    summary = summarize_youtube_script_with_mistral(script, context.user_data["LANGUE"])["markdown_summary"]
+    # await update.message.reply_text(summary[:4096]) # Telegram limite à 4096 caractères par message
+    await loading_msg.delete()
+    await send_long_message(summary, update)
 
     
 

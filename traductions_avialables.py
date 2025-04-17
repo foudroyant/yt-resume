@@ -14,9 +14,11 @@ def list_available_transcript_languages(youtube_url: str):
         #print(f"\n🌍 Langues disponibles pour la vidéo {video_id} :\n")
         for t in transcripts:
             auto = " (auto-généré)" if t.is_generated else ""
-            print(f"🔹 {t.language_code} ➜ {t.language}{auto}")
+            #print(f"🔹 {t.language_code} ➜ {t.language}{auto}")
             liste.append([t.language_code, t.language])
         return liste
     except Exception as e:
         print(f"❌ Erreur lors de la récupération des langues : {e}")
 
+ls = list_available_transcript_languages("https://youtu.be/X--4L2y997k?si=rniUcNnWZnvI3teU")
+print(ls)
