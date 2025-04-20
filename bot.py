@@ -18,6 +18,7 @@ logging.basicConfig(level=logging.INFO)
 
 TOKEN_BOT = os.getenv("TELEGRAM_TOKEN")
 URL_KOME = os.getenv("URL_KOME")
+URL_WEBHOOK_N8N = os.getenv("URL_WEBHOOK_N8N")
 
 
 async def send_long_message(text: str, update: Update):
@@ -126,7 +127,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "video_id": text,
             "format": True
         }
-        response =  requests.post(URL_KOME, json=payload)
+
+        params = {
+            "video_id": text
+        }
+        response =  requests.get(URL_WEBHOOK_N8N, params=params)
         script = response.text
         #get_youtube_transcript_from_url(context.user_data["URL"], lang_code=selected_langue)["full_text"]
         if not script:
