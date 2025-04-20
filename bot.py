@@ -10,12 +10,14 @@ from main import get_youtube_transcript_from_url
 from mistral import summarize_youtube_script_with_mistral
 from textes import ACCUEIL_MESSAGE, ASTUCE_LANGUES, TUTORIEL_MESSAGE
 from traductions_avialables import list_available_transcript_languages
+import requests
 
 # Charger les variables d'environnement
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 TOKEN_BOT = os.getenv("TELEGRAM_TOKEN")
+URL_KOME = os.getenv("URL_KOME")
 
 
 async def send_long_message(text: str, update: Update):
@@ -120,8 +122,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     loading_msg = await update.message.reply_text("📄 Traitement en cours...")
     try:
-            
-        script = get_youtube_transcript_from_url(context.user_data["URL"], lang_code=selected_langue)["full_text"]
+        payload  = {
+            "video_id": text,
+            "format": True
+        }
+        response =  requests.post(URL_KOME, json=payload)
+        script = response.text
+        #get_youtube_transcript_from_url(context.user_data["URL"], lang_code=selected_langue)["full_text"]
         if not script:
             await update.message.reply_text(f"⚠️ Pas de transcription en '{selected_langue}'")
             return

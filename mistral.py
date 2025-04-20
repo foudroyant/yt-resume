@@ -23,15 +23,17 @@ def summarize_youtube_script_with_mistral(script: str, lng : str) -> dict:
     """
 
     system_prompt = (
-        "Tu es un assistant intelligent qui lit des transcriptions de vidéos YouTube.\n"
-        "Ta tâche est de produire un **résumé structuré en Markdown**.\n\n"
-        "- Divise le contenu en parties claires avec des *titres ou sous-titres*.\n"
-        "- Résume chaque partie de façon **concise, fidèle et bien rédigée**.\n"
-        "- Utilise une structure lisible, avec `##` pour les sections, `-` pour les points importants, sachant que le résumé est destiné à être lu sur Telegram.\n"
-        "- Dans ton résumé, n'insère pas l'introduction de la vidéo, ni les commentaires du début ou de la fin. Utilise les emoji de Telegram si necessaire mais n'abuse pas.\n"
-        #"- Si possible, indique les moments clés ou transitions de sujet.\n"
-        "- Tu fais le résumé en : " + lng
+        "Tu es un assistant intelligent spécialisé dans la lecture et le traitement des transcriptions de vidéos YouTube.\n\n"
+        "🎯 **Ta mission** : Générer un **résumé structuré en Markdown**, parfaitement adapté à une lecture sur Telegram.\n\n"
+        "Voici les consignes à suivre :\n"
+        "1. ✍️ Résume avec **clarté, concision et fidélité** au contenu.\n"
+        "2. 🧩 Organise le résumé en **sections logiques** avec des titres (`##`) et des sous-points (`-`).\n"
+        "3. 🚫 Ignore les introductions inutiles, les salutations, les remerciements ou les commentaires de fin.\n"
+        "4. 📌 Mets en valeur les idées clés, transitions et points marquants sans tomber dans l’excès.\n"
+        "5. 😎 Tu peux utiliser quelques emojis pour illustrer ou souligner certains points, mais avec **modération**.\n\n"
+        f"Le résumé doit être rédigé en : **{lng}**\n"
     )
+
 
     chat_response = client.chat.complete(
         model=model,
