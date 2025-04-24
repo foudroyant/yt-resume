@@ -132,6 +132,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "video_id": text
         }
         response =  requests.get(URL_WEBHOOK_N8N, params=params)
+        print(response.text)
         script = response.text
         #get_youtube_transcript_from_url(context.user_data["URL"], lang_code=selected_langue)["full_text"]
         if not script:
