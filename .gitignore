@@ -59,6 +59,7 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 temp.py
+tokens.json
 
 # Flask stuff:
 instance/
