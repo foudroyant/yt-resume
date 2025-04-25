@@ -4,11 +4,12 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from dotenv import load_dotenv
 import os
 import logging
+from directus import create_article, get_user_by_telegram, update_article
 from id_video import extract_youtube_id
 from langues import les_langues
 from main import get_youtube_transcript_from_url
 from mistral import summarize_youtube_script_with_mistral
-from textes import ACCUEIL_MESSAGE, ASTUCE_LANGUES, TUTORIEL_MESSAGE
+from textes import ABOUT_MESSAGE, ACCUEIL_MESSAGE, ASTUCE_LANGUES, GAME_OVER_MESSAGE, OFFRES_MESSAGE, TUTORIEL_MESSAGE
 from traductions_avialables import list_available_transcript_languages
 import requests
 
@@ -71,11 +72,44 @@ def get_language_keyboard(languages):
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    account = update.message.from_user.id
+    # Vérifier si l'utilisateur existe dans la base de données
+    user = get_user_by_telegram(account)
+    print(user)
+    if user:
+        # L'utilisateur existe, vous pouvez le traiter ici
+        context.user_data["user"] = user
+        print("Utilisateur trouvé :", user)
+    else:
+        # L'utilisateur n'existe pas, vous pouvez l'enregistrer ici
+        _create = create_article("users", {
+            "account_telegram": account,
+            "fullname": update.message.from_user.first_name + update.message.from_user.last_name,
+            "username": update.message.from_user.username,
+            "link": update.message.from_user.link,
+            "type_account" : "Free",
+            "credits" : 10
+        })
+        context.user_data["user"] = _create["data"]
+        #print("Utilisateur non trouvé mais il a &t& ajouté:", _create)
+
     await update.message.reply_text(ACCUEIL_MESSAGE, parse_mode="Markdown")
 
 
 async def tutoriel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(TUTORIEL_MESSAGE, parse_mode="Markdown")
+
+
+async def About(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if 'user' not in context.user_data : 
+        context.user_data["user"] = get_user_by_telegram(update.message.from_user.id)
+    
+    _MSG = ABOUT_MESSAGE(context.user_data["user"]["type_account"], context.user_data["user"]["credits"], "Aucun paiement pour le moment")
+    await update.message.reply_text(_MSG, parse_mode="Markdown")
+
+
+async def Offres(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(OFFRES_MESSAGE, parse_mode="Markdown")
 
 
 async def languages(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -112,42 +146,51 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=create_language_keyboard(text)
     )"""
 
-    if 'LANGUE' not in context.user_data :
-        language_dict = dict(les_langues())
-        language_name = language_dict.get(update.message.from_user.language_code, "Français")
-        context.user_data["LANGUE"] = language_name
-        
-    if not context.user_data["VIDEO_ID"]:
-        await update.message.reply_text("❌ Ce n’est pas un lien YouTube valide.")
-        return
+    if 'user' not in context.user_data : 
+        context.user_data["user"] = get_user_by_telegram(update.message.from_user.id)
 
-    loading_msg = await update.message.reply_text("📄 Traitement en cours...")
-    try:
-        payload  = {
-            "video_id": text,
-            "format": True
-        }
-
-        params = {
-            "video_id": text
-        }
-        response =  requests.get(URL_WEBHOOK_N8N, params=params)
-        print(response.text)
-        script = response.text
-        #get_youtube_transcript_from_url(context.user_data["URL"], lang_code=selected_langue)["full_text"]
-        if not script:
-            await update.message.reply_text(f"⚠️ Pas de transcription")
+    if context.user_data["user"]["credits"] > 0 :
+        if 'LANGUE' not in context.user_data :
+            language_dict = dict(les_langues())
+            language_name = language_dict.get(update.message.from_user.language_code, "Français")
+            context.user_data["LANGUE"] = language_name
+            
+        if not context.user_data["VIDEO_ID"]:
+            await update.message.reply_text("❌ Ce n’est pas un lien YouTube valide.")
             return
-    except Exception as e:
-        await update.message.reply_text(f"⚠️ Erreur : {str(e)}")
-        return
 
-    #await loading_msg.delete()
-    #loading_msg = await query.edit_message_text("💡 Résumé en cours...")
-    summary = summarize_youtube_script_with_mistral(script, context.user_data["LANGUE"])["markdown_summary"]
-    # await update.message.reply_text(summary[:4096]) # Telegram limite à 4096 caractères par message
-    await loading_msg.delete()
-    await send_long_message(summary, update)
+        loading_msg = await update.message.reply_text("📄 Traitement en cours...")
+        try:
+
+            params = {
+                "video_id": text
+            }
+            response =  requests.get(URL_WEBHOOK_N8N, params=params)
+            #print(response.text)
+            script = response.text
+            #get_youtube_transcript_from_url(context.user_data["URL"], lang_code=selected_langue)["full_text"]
+            if not script:
+                await update.message.reply_text(f"⚠️ Pas de transcription")
+                return
+        except Exception as e:
+            await update.message.reply_text(f"⚠️ Erreur : {str(e)}")
+            return
+
+        #await loading_msg.delete()
+        #loading_msg = await query.edit_message_text("💡 Résumé en cours...")
+        summary = summarize_youtube_script_with_mistral(script, context.user_data["LANGUE"])["markdown_summary"]
+        # await update.message.reply_text(summary[:4096]) # Telegram limite à 4096 caractères par message
+
+        _updated = update_article("users", context.user_data["user"]["id"], {
+            "credits" : context.user_data["user"]["credits"] - 1
+        })
+        print(_updated)
+        context.user_data["user"] = _updated["data"]
+
+        await loading_msg.delete()
+        await send_long_message(summary, update)
+    else:
+        await update.message.reply_text(GAME_OVER_MESSAGE, parse_mode="Markdown")
 
     
 
@@ -202,6 +245,8 @@ def run_bot():
     app.add_handler(CallbackQueryHandler(handle_language_choice))
     app.add_handler(CommandHandler("languages", languages))
     app.add_handler(CommandHandler("tutoriel", tutoriel))
+    app.add_handler(CommandHandler("about", About))
+    app.add_handler(CommandHandler("offres", Offres))
 
     app.run_polling()
 
