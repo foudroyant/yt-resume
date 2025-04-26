@@ -105,3 +105,15 @@ OFFRES_MESSAGE = """
 • 150 crédits/mois  
 • Résumé vocal en plus du texte (Bientot disponible) 
     """
+
+
+NOTE_PAIEMENT = """
+💡 *Paiement bientôt disponible !*
+
+La fonctionnalité de paiement est en cours d’intégration.  
+Très bientôt, tu pourras passer au plan **Pro** ou **Avancée** directement depuis l’application 🎉
+
+📅 *Reste à l’affût, c’est pour très bientôt !*
+
+Merci pour ta patience et ton soutien 🙏
+"""

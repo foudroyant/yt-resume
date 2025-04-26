@@ -9,7 +9,7 @@ from id_video import extract_youtube_id
 from langues import les_langues
 from main import get_youtube_transcript_from_url
 from mistral import summarize_youtube_script_with_mistral
-from textes import ABOUT_MESSAGE, ACCUEIL_MESSAGE, ASTUCE_LANGUES, GAME_OVER_MESSAGE, OFFRES_MESSAGE, TUTORIEL_MESSAGE
+from textes import ABOUT_MESSAGE, ACCUEIL_MESSAGE, ASTUCE_LANGUES, GAME_OVER_MESSAGE, NOTE_PAIEMENT, OFFRES_MESSAGE, TUTORIEL_MESSAGE
 from traductions_avialables import list_available_transcript_languages
 import requests
 
@@ -110,6 +110,10 @@ async def About(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def Offres(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(OFFRES_MESSAGE, parse_mode="Markdown")
+
+    
+async def Payer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(NOTE_PAIEMENT, parse_mode="Markdown")
 
 
 async def languages(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -247,6 +251,7 @@ def run_bot():
     app.add_handler(CommandHandler("tutoriel", tutoriel))
     app.add_handler(CommandHandler("about", About))
     app.add_handler(CommandHandler("offres", Offres))
+    app.add_handler(CommandHandler("payer", Payer))
 
     app.run_polling()
 
