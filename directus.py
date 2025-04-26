@@ -47,7 +47,7 @@ def get_headers():
     tokens = get_tokens()
     headers = {"Authorization": f"Bearer {tokens['access_token']}"}
     # Test si le token est encore bon
-    test = requests.get(f"{DIRECTUS_URL}/users/me", headers=headers)
+    test = requests.get(f"{DIRECTUS_URL}/users/forfaits", headers=headers)
     if test.status_code == 401:
         tokens = refresh_token(tokens["refresh_token"])
         headers["Authorization"] = f"Bearer {tokens['access_token']}"
@@ -88,21 +88,24 @@ def delete_article(collection, article_id):
 def get_user_by_telegram(account_telegram: str):
     try:
         
-        tokens = get_tokens()
+        """tokens = get_tokens()
         headers = {
             "Authorization": f"Bearer {tokens['access_token']}",
         }
         params = {
             "filter[account_telegram][_eq]": account_telegram
-        }
+        }"""
 
-        response = requests.get(f"{DIRECTUS_URL}/items/users", headers=headers, params=params)
+        headers = get_headers()
+
+        #response = requests.get(f"{DIRECTUS_URL}/items/users", headers=headers, params=params)
+        response = requests.get(f"{DIRECTUS_URL}/items/users", headers=headers)
         response.raise_for_status()
 
         data = response.json()
         if data.get("data"):
-            print(data["data"])
-            return data["data"][0]  # Retourne le premier utilisateur trouvé
+            _user = [u for u in data["data"] if u.get("account_telegram") == account_telegram][0]
+            return _user  # Retourne le premier utilisateur trouvé
         return None
     except Exception as e:
         print("Erreur lors de la récupération de l'utilisateur :", e)
@@ -130,5 +133,5 @@ def directus_get(endpoint):
 
 # ▶️ Exécution
 if __name__ == "__main__":
-    items = get_articles("forfaits")
-    print(items)
+    user = get_user_by_telegram("")
+    print(user)
