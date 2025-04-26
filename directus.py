@@ -47,7 +47,7 @@ def get_headers():
     tokens = get_tokens()
     headers = {"Authorization": f"Bearer {tokens['access_token']}"}
     # Test si le token est encore bon
-    test = requests.get(f"{DIRECTUS_URL}/users/forfaits", headers=headers)
+    test = requests.get(f"{DIRECTUS_URL}/users/me", headers=headers)
     if test.status_code == 401:
         tokens = refresh_token(tokens["refresh_token"])
         headers["Authorization"] = f"Bearer {tokens['access_token']}"
@@ -133,5 +133,5 @@ def directus_get(endpoint):
 
 # ▶️ Exécution
 if __name__ == "__main__":
-    user = get_user_by_telegram("")
-    print(user)
+    h = get_headers()
+    print(h)
