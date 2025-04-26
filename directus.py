@@ -99,14 +99,12 @@ def get_user_by_telegram(account_telegram: str):
         headers = get_headers()
 
         #response = requests.get(f"{DIRECTUS_URL}/items/users", headers=headers, params=params)
-        response = requests.get(f"{DIRECTUS_URL}/items/users", headers=headers)
+        response = requests.get(f"{DIRECTUS_URL}/items/users?filter[account_telegram][_eq]={account_telegram}", headers=headers)
         response.raise_for_status()
 
-        data = response.json()
-        if data.get("data"):
-            _user = [u for u in data["data"] if u.get("account_telegram") == account_telegram][0]
-            return _user  # Retourne le premier utilisateur trouvé
-        return None
+        data = response.json()["data"]
+        print(data)
+        return data[0] if data else None
     except Exception as e:
         print("Erreur lors de la récupération de l'utilisateur :", e)
         return None
